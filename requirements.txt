@@ -1,0 +1,14 @@
+unstructured[all-docs]
+unstructured-inference>=1.6.11
+pypdf>=5.0.0
+pillow
+lxml
+chromadb
+tiktoken
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-groq>=0.2.0
+langchain-google-genai>=2.0.0
+langchain-chroma>=0.1.0
+streamlit>=1.40.0
+python-dotenv>=1.0.0
