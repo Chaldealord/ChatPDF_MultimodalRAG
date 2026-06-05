@@ -12,10 +12,8 @@ A Streamlit-based application that processes PDF files to extract text, tables, 
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-- [Deployment Notes](#deployment-notes)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+
+
 
 ## Overview
 
@@ -38,30 +36,24 @@ This project is designed to:
 ## Project Structure
 
 ```text
-ChatPDF                   (project root)
-├── app.py                # Streamlit UI: upload, preview, Process PDF, Q&A
-├── rag_pipeline.py      # Orchestrator: extract → summarize → build retriever
-├── requirements.txt      # Python dependencies
-├── .streamlit/           # Optional Streamlit server config
-├── scripts/              # Helper scripts (e.g. notebook build)
-├── papers/               # Sample PDFs / notes (optional)
-├── data/                 # Runtime data (logs, extracted bundles, Chroma persist)
-│   ├── extracted/
-│   ├── chroma/
-│   └── streamlit_rag.log
-├── Multi-Modal-RAG-main/ # Reference project (not imported by app)
+ChatPDF/                        (project root)
+├── app.py                      # Streamlit UI: upload, preview, Process PDF, Q&A
+├── rag_pipeline.py             # Orchestrator: extract → summarize → build retriever
+├── requirements.txt            # Python dependencies
+├── .env                        # API keys (do NOT commit — use .env.example as template)
+├── .streamlit/
+│   └── config.toml             # Streamlit theme and performance config
+├── papers/                     # Sample PDF for testing
 └── src/
     ├── __init__.py
-    ├── config.py         # Chunk sizes, summarizer concurrency, retriever k, …
-    ├── paths.py          # PROJECT_ROOT, data/ paths
-    ├── extractor.py      # unstructured + pypdf page enrichment
-    ├── table_merge.py    # Adjacent HTML table merge
-    ├── summarizer.py     # Text / table / image summaries (Groq)
-    ├── models.py         # ChatGroq + Gemini embeddings
-    ├── retriever.py      # MultiVectorRetriever (Chroma + InMemoryStore)
-    ├── generator.py      # Retrieve → prompt → text/vision → AnswerBundle
-    ├── extract_export.py # Debug export under data/extracted/
-    └── app_utils.py      # Logging, timeouts
+    ├── config.py               # Chunk sizes, concurrency limits, retriever k
+    ├── models.py               # ChatGroq + Gemini embeddings initialization
+    ├── extractor.py            # unstructured partition_pdf + page enrichment
+    ├── table_merge.py          # Adjacent HTML table merge across pages
+    ├── summarizer.py           # Text / table / image summaries via Groq
+    ├── retriever.py            # MultiVectorRetriever (Chroma + InMemoryStore)
+    ├── generator.py            # Retrieve → prompt → text/vision LLM → AnswerBundle
+    └── app_utils.py            # Logging helpers
 ```
 
 ## Architecture (brief)
@@ -86,7 +78,9 @@ On **Linux**, install OS packages such as `tesseract-ocr` and `poppler-utils` an
 ### 1. Clone or copy the project
 
 ```bash
-cd /path/to/ChatPDF
+git clone https://github.com/Chaldealord/ChatPDF_MultimodalRAG.git
+cd ChatPDF_MultimodalRAG
+
 ```
 
 ### 2. Create a virtual environment
@@ -119,8 +113,6 @@ source venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
-**About `unstructured[all-docs]`:** the first install can download **many** transitive packages and may take a long time and several gigabytes of disk. If the install is interrupted, re-run `pip install -r requirements.txt`.
 
 ### 4. Environment variables
 
@@ -160,36 +152,3 @@ streamlit run app.py
 
 Then open the URL shown in the terminal (default **http://localhost:8501**). Upload a PDF, click **Process PDF** (wait for indexing), then ask questions in the right column.
 
-### What gets stored locally
-
-- **`data/extracted/`** — debug export of raw content + summaries per run.  
-- **`data/chroma/`** — persisted Chroma collections (new collection UUID per ingest in the current code).  
-- **`data/streamlit_rag.log`** — lightweight Q&A / error logging when using `app_utils`.
-
-There is **no** separate CLI `main.py` in this repo; batch usage can call `rag_pipeline.process_pdf` from Python if you add your own script.
-
-## Deployment Notes
-
-- Copy **`app.py`**, **`rag_pipeline.py`**, **`src/`**, **`requirements.txt`**, and optionally **`.streamlit/`**.  
-- Do **not** rely on creating the venv on another machine by copying `venv/`; run `python -m venv venv` again on the host.  
-- Install **Poppler** + **Tesseract** on the server if you keep `strategy="hi_res"` in `extractor.py`.  
-- Set **`GROQ_API_KEY`** and **`GOOGLE_API_KEY`** on the host (environment or `.env`).
-
-## Troubleshooting
-
-- **PowerShell:** `Activate.ps1` blocked → [Installation](#installation) (RemoteSigned or `activate.bat`).  
-- **Groq 429:** Lower concurrency in `src/config.py` (summarizer already uses conservative defaults + retries).  
-- **PDF extract errors:** Verify Poppler/Tesseract and paths in `src/extractor.py`.  
-- **Missing pages in citations:** Re-run **Process PDF** after extractor/generator updates.
-
-## Contributing
-
-Fork / branch, keep changes focused, and match existing style in `src/`. Avoid committing `.env`, `venv/`, or large `data/` artifacts.
-
-## License
-
-Specify your license here (not set in this template).
-
----
-
-**Contact:** Add maintainer / issue tracker links as needed.
