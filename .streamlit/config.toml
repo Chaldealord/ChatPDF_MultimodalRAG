@@ -1,0 +1,22 @@
+[server]
+headless = true
+
+[runner]
+# Usually default true — explicit for clarity after interactive tuning.
+fastReruns = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showSidebarNavigation = false
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#2563eb"
+backgroundColor = "#f3f4f6"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#111111"
+font = "sans serif"
+
